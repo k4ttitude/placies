@@ -10,7 +10,7 @@ app.get("/", (_, res) => {
 app.get("/locations", async (req, res) => {
   const locations = await findLocations({
     point: { lng: 106.167665996, lat: 20.418664992 },
-    distance: 100_000,
+    distanceInMeters: 100_000,
   });
   res.status(200).send(JSON.stringify(locations));
 });

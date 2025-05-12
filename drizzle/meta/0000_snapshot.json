@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "90cf5e2e-0751-4de6-a359-bc4e90a87fa2",
+  "id": "8ceb00ad-762f-4588-9b3c-81eb9ba1bcdb",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "favorites": {
@@ -97,12 +97,30 @@
           "notNull": true,
           "autoincrement": true
         },
+        "longitude": {
+          "name": "longitude",
+          "type": "decimal(11,8)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "latitude": {
+          "name": "latitude",
+          "type": "decimal(10,8)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "coordinates": {
           "name": "coordinates",
           "type": "POINT",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "generated": {
+            "as": "ST_PointFromText(CONCAT('POINT(', longitude, ' ', latitude, ')'), 4326)",
+            "type": "stored"
+          }
         },
         "name": {
           "name": "name",
@@ -130,6 +148,20 @@
         }
       },
       "indexes": {
+        "longitude_idx": {
+          "name": "longitude_idx",
+          "columns": [
+            "longitude"
+          ],
+          "isUnique": false
+        },
+        "latitude_idx": {
+          "name": "latitude_idx",
+          "columns": [
+            "latitude"
+          ],
+          "isUnique": false
+        },
         "coordinates_spatial_idx": {
           "name": "coordinates_spatial_idx",
           "columns": [

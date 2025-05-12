@@ -1,20 +1,49 @@
-import { sql } from "drizzle-orm";
+import { and, getTableColumns, lte, sql } from "drizzle-orm";
 import { db } from "../../db";
-import { sqlGeographicPoint, locationsTable } from "../../db/schema";
+import { sqlGeographicPoint, locations } from "../../db/schema";
+
+const KM_PER_LAT = 111.32;
+
+function degreesToRadians(degrees: number) {
+  return degrees * (Math.PI / 180);
+}
 
 type FindLocationsQuery = {
   point: { lat: number; lng: number };
-  distance: number; // distance in meters
+  distanceInMeters: number; // distance in meters
 };
 
-export async function findLocations({ point, distance }: FindLocationsQuery) {
-  const sqlPoint = sqlGeographicPoint(point);
-  const distanceInMilimeters = distance * 1000;
-  const locations = await db
-    .select()
-    .from(locationsTable)
+export async function findLocations({
+  point,
+  distanceInMeters,
+}: FindLocationsQuery) {
+  const now = Date.now();
+  const key = `Find locations (${now}):`;
+  console.time(key);
+
+  const centrePoint = sqlGeographicPoint(point);
+
+  const distanceInKm = distanceInMeters / 1000;
+  const kmPerDeltaLng = KM_PER_LAT * Math.cos(degreesToRadians(point.lat));
+
+  console.log(distanceInKm);
+
+  const locationRecords = await db
+    .select({
+      ...getTableColumns(locations),
+      distance: sql`ST_Distance_Sphere(${locations.coordinates}, ${centrePoint})`,
+    })
+    .from(locations)
     .where(
-      sql`ST_Distance_Sphere(${locationsTable.coordinates}, ${sqlPoint}) < ${distanceInMilimeters}`,
+      and(
+        sql`ABS(${locations.latitude} - ${point.lat}) * ${KM_PER_LAT}  <= ${distanceInKm}`,
+        sql`ABS(${locations.longitude} - ${point.lng}) * ${kmPerDeltaLng} <= ${distanceInKm}`,
+      ),
     );
-  return locations;
+  // .having(({ distance: calculatedDistance }) =>
+  //   lte(calculatedDistance, distanceInKm),
+  // );
+
+  console.timeEnd(key);
+  return locationRecords;
 }

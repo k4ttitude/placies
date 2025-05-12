@@ -1,4 +1,4 @@
-import { locationsTable } from "./schema"; // Adjust import path as needed
+import { locations } from "./schema"; // Adjust import path as needed
 import { faker } from "@faker-js/faker";
 import { db } from ".";
 import { seed } from "drizzle-seed";
@@ -8,6 +8,14 @@ import { seed } from "drizzle-seed";
  */
 const BATCH_SIZE = 5000;
 const TOTAL_RECORDS = 1_000_000;
+
+function generateRandomLocation() {
+  return {
+    name: faker.location.city(),
+    latitude: faker.location.latitude().toString(),
+    longitude: faker.location.longitude().toString(),
+  };
+}
 
 async function manualSeed() {
   try {
@@ -24,7 +32,7 @@ async function manualSeed() {
         generateRandomLocation,
       );
 
-      await db.insert(locationsTable).values(batchData);
+      await db.insert(locations).values(batchData);
 
       completedRecords += batchSize;
       const progressPercent = (
@@ -40,17 +48,6 @@ async function manualSeed() {
   } finally {
     db.$client.end();
   }
-}
-
-function generateRandomLocation() {
-  const lat = faker.location.latitude();
-  const lng = faker.location.longitude();
-
-  return {
-    // We don't need to set the ID as it's auto-incremented
-    coordinates: { lat, lng },
-    name: faker.location.city(),
-  };
 }
 
 manualSeed();
@@ -87,7 +84,7 @@ export async function drizzleSeed() {
     }
   }
 
-  await seed(db, { locations: locationsTable }).refine((f) => ({
+  await seed(db, { locations }).refine((f) => ({
     locations: {
       count: 1_000_000,
       columns: {
