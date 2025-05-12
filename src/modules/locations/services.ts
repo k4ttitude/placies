@@ -10,23 +10,38 @@ function degreesToRadians(degrees: number) {
 
 type FindLocationsQuery = {
   point: { lat: number; lng: number };
+  bound?: { top: number; bottom: number; left: number; right: number };
   distanceInMeters: number; // distance in meters
 };
 
 export async function findLocations({
   point,
+  bound,
   distanceInMeters,
 }: FindLocationsQuery) {
-  const now = Date.now();
-  const key = `Find locations (${now}):`;
+  const now = new Date().toISOString();
+  const key = `${now} Find locations:`;
   console.time(key);
-
-  const centrePoint = sqlGeographicPoint(point);
 
   const distanceInKm = distanceInMeters / 1000;
   const kmPerDeltaLng = KM_PER_LAT * Math.cos(degreesToRadians(point.lat));
 
-  console.log(distanceInKm);
+  const boundingBoxConditions = [
+    sql`ABS(${locations.latitude} - ${point.lat}) * ${KM_PER_LAT}  <= ${distanceInKm}`,
+    sql`ABS(${locations.longitude} - ${point.lng}) * ${kmPerDeltaLng} <= ${distanceInKm}`,
+  ];
+
+  if (bound) {
+    // filter by these conditions first
+    boundingBoxConditions.unshift(
+      sql`${locations.latitude} <= ${bound.top}`,
+      sql`${locations.latitude} >= ${bound.bottom}`,
+      sql`${locations.longitude} >= ${bound.left}`,
+      sql`${locations.longitude} <= ${bound.right}`,
+    );
+  }
+
+  const centrePoint = sqlGeographicPoint(point);
 
   const locationRecords = await db
     .select({
@@ -34,16 +49,12 @@ export async function findLocations({
       distance: sql`ST_Distance_Sphere(${locations.coordinates}, ${centrePoint})`,
     })
     .from(locations)
-    .where(
-      and(
-        sql`ABS(${locations.latitude} - ${point.lat}) * ${KM_PER_LAT}  <= ${distanceInKm}`,
-        sql`ABS(${locations.longitude} - ${point.lng}) * ${kmPerDeltaLng} <= ${distanceInKm}`,
-      ),
+    .where(and(...boundingBoxConditions))
+    .having(({ distance: calculatedDistance }) =>
+      lte(calculatedDistance, distanceInMeters),
     );
-  // .having(({ distance: calculatedDistance }) =>
-  //   lte(calculatedDistance, distanceInKm),
-  // );
 
   console.timeEnd(key);
+
   return locationRecords;
 }
