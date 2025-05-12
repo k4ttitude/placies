@@ -16,28 +16,28 @@ import {
  */
 export const GEOGRAPHY_SRID = 4326;
 
+export function sqlGeographicPoint(point: { lng: number; lat: number }) {
+  // Return POINT as WKT (Well-Known Text) with SRID 4326
+  return sql`ST_GeomFromText('POINT(${point.lat} ${point.lng})', ${GEOGRAPHY_SRID})`;
+}
+
 const point = customType<{
-  data: { lat: number; lng: number } | null;
+  data: { lng: number; lat: number };
+  driverData: { x: number; y: number }; // mysql2 returns geographic point in format { x, y }
 }>({
   dataType() {
     return "POINT";
   },
+
   toDriver(value) {
     if (value) {
-      // Return POINT as WKT (Well-Known Text) with SRID 4326
-      return sql`ST_GeomFromText('POINT(${value.lng} ${value.lat})', ${GEOGRAPHY_SRID})`;
+      return sqlGeographicPoint(value);
     }
     return value;
   },
+
   fromDriver(value) {
-    if (value) {
-      // Convert from MySQL POINT type to { lat, lng }
-      const match = /^POINT\(([-\d.]+) ([-\d.]+)\)$/.exec(String(value));
-      if (match) {
-        return { lng: parseFloat(match[1]), lat: parseFloat(match[2]) };
-      }
-    }
-    return null;
+    return { lng: value.x, lat: value.y };
   },
 });
 

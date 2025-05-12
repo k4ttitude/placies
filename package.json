@@ -2,18 +2,22 @@
   "name": "placies",
   "version": "1.0.0",
   "description": "",
-  "main": "src/index.ts",
+  "type": "module",
+  "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "seed": "node --import tsx src/db/seed.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.9.0",
   "dependencies": {
+    "@faker-js/faker": "^9.7.0",
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.43.1",
+    "drizzle-seed": "^0.3.1",
     "express": "^5.1.0",
     "mysql2": "^3.14.1",
     "typescript": "^5.8.3"
