@@ -1,16 +1,15 @@
 services:
   db:
-    image: postgis/postgis:16-3.4
-    platform: linux/amd64
+    image: mysql:8.4.5
     ports:
-      - 5432:5432/tcp
+      - 3306:3306
     volumes:
-      - "postgres-data:/var/lib/postgresql/data"
+      - mysql-data:/var/lib/mysql
     environment:
-      POSTGRES_USER: placies
-      POSTGRES_PASSWORD: placies
-      POSTGRES_DB: placies
-      DB_EXTENSION: postgis
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: placies
+      MYSQL_PASSWORD: placies
+      MYSQL_DATABASE: placies
 
   redis:
     image: redis:latest
@@ -18,7 +17,7 @@ services:
       - 6379:6379/tcp
 
 volumes:
-  postgres-data:
+  mysql-data:
     driver: local
   pgadmin:
     driver: local
