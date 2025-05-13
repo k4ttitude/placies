@@ -1,24 +1,19 @@
 import "./configs/env";
 
 import express from "express";
-import { findLocations } from "./modules/locations/services";
+
+import { env } from "./configs/env";
+import { locationsRouter } from "./modules/locations/controlers";
 
 const app = express();
-const PORT = 3000;
+const port = env.PORT;
 
-app.get("/", (_, res) => {
-  res.send("Hello World!");
+app.get("/health", (_, res) => {
+  res.status(200).send("OK");
 });
 
-app.get("/locations", async (req, res) => {
-  const locations = await findLocations({
-    point: { lng: 106.167665996, lat: 20.418664992 },
-    distanceInMeters: 100_000,
-    bound: { top: 24, bottom: 21, left: 105, right: 107 },
-  });
-  res.status(200).send(JSON.stringify(locations));
-});
+app.use("/locations", locationsRouter);
 
-app.listen(PORT, () => {
-  console.log(`Listening on port ${PORT}...`);
+app.listen(port, () => {
+  console.log(`Listening on port ${port}...`);
 });
