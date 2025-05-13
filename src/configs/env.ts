@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { z } from "zod";
+import { NumberStringSchema } from "../helpers/dto";
 
 const envSchema = z.object({
   NODE_ENV: z
@@ -7,7 +8,7 @@ const envSchema = z.object({
     .default("development"),
   DATABASE_URL: z.string().url(),
   REDIS_URL: z.string().url(),
-  PORT: z.string().regex(/^\d+$/).transform(Number).default("3000"),
+  PORT: NumberStringSchema.default("3000"),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
