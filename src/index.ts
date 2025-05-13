@@ -1,5 +1,8 @@
+import "./configs/env";
+
 import express from "express";
 import { findLocations } from "./modules/locations/services";
+
 const app = express();
 const PORT = 3000;
 
