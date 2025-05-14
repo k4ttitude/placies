@@ -8,9 +8,13 @@ import {
 import { route } from "../../helpers/route";
 import { z } from "zod";
 import { NumberStringSchema } from "../../helpers/validations";
+import { apikeyAuth } from "../auth/guard";
 
 const locationsRouter: Router = Router();
 
+/**
+ * Public route
+ */
 locationsRouter.get(
   "/",
   route({ query: FindManyLocationsQuerySchema }, async (req, res) => {
@@ -24,6 +28,11 @@ locationsRouter.get(
     return res.status(200).send(results);
   }),
 );
+
+/**
+ * Authenticated routes
+ */
+locationsRouter.use(apikeyAuth);
 
 locationsRouter.post(
   "/",

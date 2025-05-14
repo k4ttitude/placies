@@ -6,7 +6,6 @@ import bodyParser from "body-parser";
 import { env } from "./configs/env";
 import { locationsRouter } from "./modules/locations/controlers";
 import { errorHandler } from "./error";
-import { apikeyAuth } from "./modules/auth/guard";
 
 const app = express();
 
@@ -17,7 +16,7 @@ app.get("/health", (_, res) => {
   res.status(200).send("OK");
 });
 
-app.use("/locations", apikeyAuth, locationsRouter);
+app.use("/locations", locationsRouter);
 // end routes
 
 app.use(errorHandler);
