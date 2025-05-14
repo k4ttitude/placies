@@ -3,10 +3,12 @@ import { env } from "./configs/env";
 
 export class PlaciesError extends Error {
   status: number;
+  publicMessage?: string;
 
   constructor(input: string | Error | object, status: number = 500) {
     if (typeof input === "string") {
       super(input);
+      this.publicMessage = input;
     } else if (input instanceof Error) {
       super(input.message);
       this.stack = input.stack;
@@ -31,7 +33,9 @@ export function errorHandler(
   console.error(err);
 
   const status = err instanceof PlaciesError ? err.status : 500;
-  const message = err.message ?? "Internal Server Error";
+  const publicMessage =
+    err instanceof PlaciesError ? err.publicMessage : undefined;
+  const message = publicMessage ?? "Internal Server Error";
 
   res.status(status).json({
     error: {

@@ -17,7 +17,6 @@ app.use(bodyParser.json());
 app.get("/health", (_, res) => {
   res.status(200).send("OK");
 });
-
 app.use("/locations", locationsRouter);
 app.use("/users", usersRouter);
 app.use("/favorites", favoritesRouter);
