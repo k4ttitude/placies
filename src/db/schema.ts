@@ -5,17 +5,15 @@ import {
   varchar,
   timestamp,
   char,
-  serial,
-  primaryKey,
-  bigint,
   decimal,
+  unique,
+  int,
 } from "drizzle-orm/mysql-core";
 import { GEOGRAPHY_SRID, point } from "./column";
 
 export const users = mysqlTable("users", {
-  id: char("id", { length: 36 })
-    .primaryKey()
-    .default(sql`(UUID())`),
+  id: int().autoincrement().primaryKey(),
+  externalId: char("external_id", { length: 36 }),
   name: varchar({ length: 255 }).notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
@@ -24,7 +22,7 @@ export const users = mysqlTable("users", {
 export const locations = mysqlTable(
   "locations",
   {
-    id: serial().primaryKey(),
+    id: int().autoincrement().primaryKey(),
     longitude: decimal({ precision: 11, scale: 8 }).notNull(),
     latitude: decimal({ precision: 10, scale: 8 }).notNull(),
     coordinates: point()
@@ -50,14 +48,16 @@ export const locations = mysqlTable(
 export const favorites = mysqlTable(
   "favorites",
   {
-    userId: char("user_id", { length: 36 }).references(() => users.id),
-    locationId: bigint("location_id", {
-      mode: "bigint",
-      unsigned: true,
-    }).references(() => locations.id),
+    id: int().autoincrement().primaryKey(),
+    userId: int("user_id")
+      .references(() => users.id)
+      .notNull(),
+    locationId: int("location_id")
+      .references(() => locations.id)
+      .notNull(),
     label: varchar("label", { length: 255 }),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
   },
-  (t) => [primaryKey({ columns: [t.userId, t.locationId] })],
+  (t) => [unique().on(t.userId, t.locationId)],
 );
