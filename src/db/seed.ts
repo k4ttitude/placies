@@ -12,10 +12,6 @@ export async function drizzleSeed() {
     const schema = { locations, users, favorites };
     await reset(db, schema);
 
-    await db
-      .insert(users)
-      .values({ id: "00000000-0000-0000-0000-000000000000", name: "John Doe" });
-
     await seed(db, schema).refine((f) => ({
       locations: {
         count: locationsCount,
@@ -30,10 +26,7 @@ export async function drizzleSeed() {
       },
       users: {
         count: usersCount,
-        columns: {
-          id: f.uuid(),
-          name: f.fullName(),
-        },
+        columns: { name: f.fullName() },
       },
       favorites: {
         count: 5,
@@ -42,7 +35,7 @@ export async function drizzleSeed() {
     }));
 
     console.info("Seeded");
-    console.table({ locations: locationsCount, users: usersCount + 1 });
+    console.table({ locations: locationsCount, users: usersCount });
   } catch (err) {
     console.log(err);
   } finally {

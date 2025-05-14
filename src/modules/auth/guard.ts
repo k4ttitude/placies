@@ -15,7 +15,7 @@ passport.use(
     async function (_req: Request, token: string, done: DoneCallback) {
       const [user, error] = await tryCatch(
         db.query.users.findFirst({
-          where: eq(users.id, token),
+          where: eq(users.id, Number(token)),
         }),
       );
       if (error) {

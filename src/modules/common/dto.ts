@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { NumberStringSchema } from "../../helpers/validations";
 
-export const IdSchema = NumberStringSchema.transform(BigInt).pipe(z.bigint());
+export const IdSchema = NumberStringSchema.transform(Number).pipe(z.number());
 export type Id = z.infer<typeof IdSchema>;
 
 export const IdParamsSchema = z.object({ id: IdSchema });

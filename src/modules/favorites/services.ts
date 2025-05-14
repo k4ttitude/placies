@@ -10,10 +10,7 @@ import {
 import { Id } from "../common/dto";
 import { PlaciesError } from "../../error";
 
-export function findManyFavorties(
-  userId: User["id"],
-  query: FindManyFavoritesQuery,
-) {
+export function findManyFavorties(userId: Id, query: FindManyFavoritesQuery) {
   const conditions = [eq(favorites.userId, userId)];
   if (query.q) {
     conditions.push(ilike(favorites.label, query.q));
@@ -29,7 +26,7 @@ export function findManyFavorties(
 
 async function findFavorite(userId: User["id"], id: Id) {
   const userFavorite = await db.query.favorites.findFirst({
-    where: and(eq(users.id, userId), eq(favorites.locationId, id)),
+    where: and(eq(users.id, userId), eq(favorites.id, id)),
   });
 
   if (!userFavorite) {
@@ -63,13 +60,13 @@ export async function updateFavorite(
     .set({
       ...data,
       locationId:
-        typeof data.locationId === "bigint" ? data.locationId : undefined,
+        typeof data.locationId === "number" ? data.locationId : undefined,
       userId,
     })
-    .where(eq(favorites.locationId, id));
+    .where(eq(favorites.id, id));
 
   const updated = await db.query.favorites.findFirst({
-    where: eq(favorites.locationId, id),
+    where: eq(favorites.id, id),
   });
 
   return updated;
@@ -78,5 +75,5 @@ export async function updateFavorite(
 export async function removeFavorite(userId: User["id"], id: Id) {
   await findFavorite(userId, id);
 
-  return db.delete(favorites).where(eq(favorites.locationId, id));
+  return db.delete(favorites).where(eq(favorites.id, id));
 }
