@@ -30,4 +30,4 @@ passport.use(
   ),
 );
 
-export const apikeyAuth = passport.authenticate("header");
+export const apikeyAuth = passport.authenticate("header", { session: false });

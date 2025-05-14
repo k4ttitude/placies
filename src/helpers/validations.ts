@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const NumberStringSchema = z
-  .string()
+  .union([z.string(), z.number()])
   .refine((val) => !isNaN(Number(val)), {
     message: "Must be a number (or string convertible to number)",
   })

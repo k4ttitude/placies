@@ -11,6 +11,6 @@ export function sqlGeographicPoint(point: { lng: number; lat: number }) {
   return sql`ST_GeomFromText('POINT(${point.lat} ${point.lng})', ${GEOGRAPHY_SRID})`;
 }
 
-export const point = customType({
+export const point = customType<{ data: { x: number; y: number } }>({
   dataType: () => "POINT",
 });

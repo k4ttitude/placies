@@ -17,6 +17,9 @@
     "noFallthroughCasesInSwitch": true,
     "removeComments": false,
   },
+  "files": [
+    "passport.d.ts"
+  ],
   "include": [
     "src/**/*"
   ],
