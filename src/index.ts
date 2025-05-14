@@ -5,19 +5,21 @@ import bodyParser from "body-parser";
 
 import { env } from "./configs/env";
 import { locationsRouter } from "./modules/locations/controlers";
+import { errorHandler } from "./error";
 
 const app = express();
 
 app.use(bodyParser.json());
 
-/**
- * Routes
- */
+// routes
 app.get("/health", (_, res) => {
   res.status(200).send("OK");
 });
 
 app.use("/locations", locationsRouter);
+// end routes
+
+app.use(errorHandler);
 
 const port = env.PORT;
 app.listen(port, () => {

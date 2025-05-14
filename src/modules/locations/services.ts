@@ -2,6 +2,7 @@ import { and, eq, getTableColumns, lte, sql } from "drizzle-orm";
 import { db } from "../../db";
 import { locations } from "../../db/schema";
 import { sqlGeographicPoint } from "../../db/column";
+import { PlaciesError } from "../../error";
 import { CreateLocationBody, UpdateLocationBody } from "./dto";
 
 const KM_PER_LAT = 111.32;
@@ -75,8 +76,8 @@ export async function findLocation(id: number) {
     where: eq(locations.id, id),
   });
 
-  if (!locations) {
-    throw new Error("not found");
+  if (!location) {
+    throw new PlaciesError("Location not found", 404);
   }
 
   return location;

@@ -1,5 +1,6 @@
 import { Request, Response, RequestHandler, NextFunction } from "express";
 import { z, ZodSchema } from "zod";
+import { PlaciesError } from "../error";
 
 export interface RouteOptions {
   params?: ZodSchema;
@@ -30,7 +31,7 @@ export function route<TOptions extends RouteOptions, TResult>(
   options: TOptions,
   handler: AsyncRequestHandlerFromOptions<TOptions, TResult>,
 ): RequestHandler[] {
-  const validator = (req: Request, res: Response, next: NextFunction) => {
+  const validator = (req: Request, _res: Response, next: NextFunction) => {
     const { params, query, body } = options;
     const parseResult = z
       .object({
@@ -41,9 +42,7 @@ export function route<TOptions extends RouteOptions, TResult>(
       .safeParse(req);
 
     if (!parseResult.success) {
-      res.status(400).send(parseResult.error.issues);
-      // next(parseResult.error);
-      return;
+      throw new PlaciesError(parseResult.error, 400);
     }
     const parsed = parseResult.data;
 
@@ -66,7 +65,12 @@ export function route<TOptions extends RouteOptions, TResult>(
     res: Response,
     next: NextFunction,
   ) => {
-    await handler(req, res, next);
+    try {
+      await handler(req, res, next);
+    } catch (err) {
+      // express does NOT catch async error
+      next(err);
+    }
   };
 
   return [validator, routeHandler];
