@@ -6,6 +6,7 @@ import bodyParser from "body-parser";
 import { env } from "./configs/env";
 import { locationsRouter } from "./modules/locations/controlers";
 import { errorHandler } from "./error";
+import { usersRouter } from "./modules/users/controllers";
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.get("/health", (_, res) => {
 });
 
 app.use("/locations", locationsRouter);
+app.use("/users", usersRouter);
 // end routes
 
 app.use(errorHandler);
