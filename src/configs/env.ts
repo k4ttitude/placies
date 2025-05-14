@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { z } from "zod";
-import { NumberStringSchema } from "../helpers/dto";
+import { NumberStringSchema } from "../helpers/validations";
 
 const envSchema = z.object({
   NODE_ENV: z

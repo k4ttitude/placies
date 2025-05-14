@@ -11,6 +11,9 @@ importers:
       '@faker-js/faker':
         specifier: ^9.7.0
         version: 9.7.0
+      body-parser:
+        specifier: ^2.2.0
+        version: 2.2.0
       dotenv:
         specifier: ^16.5.0
         version: 16.5.0
@@ -36,6 +39,9 @@ importers:
       '@eslint/js':
         specifier: ^9.26.0
         version: 9.26.0
+      '@types/body-parser':
+        specifier: ^1.19.5
+        version: 1.19.5
       '@types/express':
         specifier: ^5.0.1
         version: 5.0.1

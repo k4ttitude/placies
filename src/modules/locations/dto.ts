@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { NumberStringSchema } from "../../helpers/dto";
+import { NumberStringSchema } from "../../helpers/validations";
 
 export const LongitudeSchema = z.number().min(-180).max(180);
 export const LatitudeSchema = z.number().min(-90).max(90);
@@ -19,3 +19,13 @@ export const FindManyLocationsQuerySchema = z.object({
     })
     .optional(),
 });
+
+export const CreateLocationBodySchema = z.object({
+  lng: LongitudeSchema,
+  lat: LongitudeSchema,
+  name: z.string().max(255),
+});
+export type CreateLocationBody = z.infer<typeof CreateLocationBodySchema>;
+
+export const UpdateLocationBodySchema = CreateLocationBodySchema.partial();
+export type UpdateLocationBody = z.infer<typeof UpdateLocationBodySchema>;

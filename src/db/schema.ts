@@ -9,27 +9,10 @@ import {
   primaryKey,
   bigint,
   decimal,
-  customType,
 } from "drizzle-orm/mysql-core";
+import { GEOGRAPHY_SRID, point } from "./column";
 
-/**
- * Geogprahic data type
- */
-export const GEOGRAPHY_SRID = 4326;
-
-export function sqlGeographicPoint(point: { lng: number; lat: number }) {
-  // Return POINT as WKT (Well-Known Text) with SRID 4326
-  return sql`ST_GeomFromText('POINT(${point.lat} ${point.lng})', ${GEOGRAPHY_SRID})`;
-}
-
-const point = customType({
-  dataType: () => "POINT",
-});
-
-/**
- * Models
- */
-export const usersTable = mysqlTable("users", {
+export const users = mysqlTable("users", {
   id: char("id", { length: 36 })
     .primaryKey()
     .default(sql`(UUID())`),
@@ -67,7 +50,7 @@ export const locations = mysqlTable(
 export const favorites = mysqlTable(
   "favorites",
   {
-    userId: char("user_id", { length: 36 }).references(() => usersTable.id),
+    userId: char("user_id", { length: 36 }).references(() => users.id),
     locationId: bigint("location_id", {
       mode: "bigint",
       unsigned: true,

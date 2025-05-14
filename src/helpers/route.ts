@@ -1,31 +1,34 @@
 import { Request, Response, RequestHandler, NextFunction } from "express";
 import { z, ZodSchema } from "zod";
 
-export interface AsyncHandler<T, TParams, TResBody, TReqBody, TQuery> {
-  (
-    req: Request<TParams, TResBody, TReqBody, TQuery>,
-    res: Response,
-    next: NextFunction,
-  ): PromiseLike<T>;
-}
-
 export interface RouteOptions {
   params?: ZodSchema;
   query?: ZodSchema;
   body?: ZodSchema;
 }
 
+export interface AsyncRequestHandler<T, TParams, TResBody, TReqBody, TQuery> {
+  (
+    req: Request<TParams, TResBody, TReqBody, TQuery>,
+    res: Response,
+    next: NextFunction,
+  ): T | PromiseLike<T>;
+}
+
+export type AsyncRequestHandlerFromOptions<
+  TOptions extends RouteOptions,
+  TResult,
+> = AsyncRequestHandler<
+  TResult,
+  TOptions["params"] extends ZodSchema ? z.infer<TOptions["params"]> : unknown,
+  unknown,
+  TOptions["body"] extends ZodSchema ? z.infer<TOptions["body"]> : unknown,
+  TOptions["query"] extends ZodSchema ? z.infer<TOptions["query"]> : unknown
+>;
+
 export function route<TOptions extends RouteOptions, TResult>(
   options: TOptions,
-  handler: AsyncHandler<
-    TResult,
-    TOptions["params"] extends ZodSchema
-      ? z.infer<TOptions["params"]>
-      : unknown,
-    unknown,
-    TOptions["body"] extends ZodSchema ? z.infer<TOptions["body"]> : unknown,
-    TOptions["query"] extends ZodSchema ? z.infer<TOptions["query"]> : unknown
-  >,
+  handler: AsyncRequestHandlerFromOptions<TOptions, TResult>,
 ): RequestHandler[] {
   const validator = (req: Request, res: Response, next: NextFunction) => {
     const { params, query, body } = options;
@@ -55,7 +58,6 @@ export function route<TOptions extends RouteOptions, TResult>(
     req.params = parsed.params;
     req.body = parsed.body;
 
-    console.log(req.query, parsed.query);
     next();
   };
 

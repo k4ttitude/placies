@@ -8,9 +8,12 @@ import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended"
 export default defineConfig([
   {
     files: ["**/*.{js,mjs,cjs,ts}"],
-    languageOptions: { globals: globals.node },
     plugins: { js },
     extends: ["js/recommended"],
+    languageOptions: {
+      globals: globals.node,
+      sourceType: "module",
+    },
   },
 
   tseslint.configs.recommended,
