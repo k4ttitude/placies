@@ -1,6 +1,6 @@
-import { and, eq, getTableColumns, lte, or, sql } from "drizzle-orm";
+import { and, eq, getTableColumns, like, lte, or, sql } from "drizzle-orm";
 import { db } from "../../db";
-import { locations } from "../../db/schema";
+import { categories, locations, locationsToCategories } from "../../db/schema";
 import { sqlGeographicPoint } from "../../db/column";
 import { PlaciesError } from "../../error";
 import {
@@ -20,6 +20,7 @@ type FindLocationsQuery = Partial<PaginationQuery> & {
   point: { lat: number; lng: number };
   bound?: { top: number; bottom: number; left: number; right: number };
   distanceInMeters: number;
+  q?: string;
 };
 
 /**
@@ -28,12 +29,14 @@ type FindLocationsQuery = Partial<PaginationQuery> & {
  * @param params.point - Center point coordinates {lat, lng}
  * @param params.bound - Optional bounding box {top, bottom, left, right}
  * @param params.distanceInMeters - Search radius in meters
+ * @param params.q - Search query applying to location name and category
  * @returns Array of locations with calculated distances
  */
 export async function findLocations({
   point,
   bound,
   distanceInMeters,
+  q,
   limit = DEFAULT_PAGINATION.limit,
   offset = DEFAULT_PAGINATION.offset,
 }: FindLocationsQuery): Promise<FindManyLocationsResponse> {
@@ -44,7 +47,8 @@ export async function findLocations({
   const distanceInKm = distanceInMeters / 1000;
   const kmPerDeltaLng = KM_PER_LAT * Math.cos(degreesToRadians(point.lat));
 
-  const boundingBoxConditions = [
+  // bounding box conditions by distance
+  const conditions = [
     sql`ABS(${locations.latitude} - ${point.lat}) * ${KM_PER_LAT}  <= ${distanceInKm}`,
     or(
       sql`ABS(${locations.longitude} - ${point.lng}) * ${kmPerDeltaLng} <= ${distanceInKm}`,
@@ -54,8 +58,9 @@ export async function findLocations({
   ];
 
   if (bound) {
+    // bound box conditions by bound
     // filter by these conditions first
-    boundingBoxConditions.unshift(
+    conditions.unshift(
       sql`${locations.latitude} <= ${bound.top}`,
       sql`${locations.latitude} >= ${bound.bottom}`,
       or(
@@ -63,6 +68,14 @@ export async function findLocations({
         sql`${locations.longitude} BETWEEN ${bound.left - 360} AND ${bound.right}`,
         sql`${locations.longitude} BETWEEN ${bound.left} AND ${bound.right + 360}`,
       ),
+    );
+  }
+
+  if (q) {
+    const lowerCaseQ = `%${q.toLowerCase()}%`;
+    conditions.push(
+      like(locations.nameLowerCase, lowerCaseQ),
+      or(like(categories.nameLowerCase, lowerCaseQ)),
     );
   }
 
@@ -74,7 +87,12 @@ export async function findLocations({
       distance: sql<number>`ST_Distance_Sphere(${locations.coordinates}, ${centrePoint})`,
     })
     .from(locations)
-    .where(and(...boundingBoxConditions))
+    .leftJoin(
+      locationsToCategories,
+      eq(locations.id, locationsToCategories.locationId),
+    )
+    .leftJoin(categories, eq(categories.id, locationsToCategories.categoryId))
+    .where(and(...conditions))
     .having(({ distance: calculatedDistance }) =>
       lte(calculatedDistance, distanceInMeters),
     )

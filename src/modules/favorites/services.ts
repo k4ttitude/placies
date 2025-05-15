@@ -24,7 +24,7 @@ export async function findManyFavorties(
     conditions.push(
       or(
         like(sql`LOWER(${favorites.label})`, lowerCaseQ),
-        like(sql`LOWER(${locations.name})`, lowerCaseQ),
+        like(locations.nameLowerCase, lowerCaseQ),
       ),
     );
   }

@@ -1,0 +1,2 @@
+ALTER TABLE `categories` ADD `name_lowercase` varchar(255) GENERATED ALWAYS AS (LOWER(name)) STORED;--> statement-breakpoint
+ALTER TABLE `locations` ADD `name_lowercase` varchar(255) GENERATED ALWAYS AS (LOWER(name)) STORED;

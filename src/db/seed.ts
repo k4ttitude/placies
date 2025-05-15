@@ -10,8 +10,13 @@ import { reset, seed } from "drizzle-seed";
 import { GEOGRAPHY_SRID } from "./column";
 import { sql } from "drizzle-orm";
 
-const locationsCount = parseInt(process.env.LOCATIONS || "1000000");
-const usersCount = parseInt(process.env.USERS || "5");
+const counts = {
+  locations: parseInt(process.env.LOCATIONS || "1000000"),
+  users: 5,
+  favorites: 5,
+  categories: 5,
+  locationsToCategories: 20,
+};
 
 export async function drizzleSeed() {
   try {
@@ -26,7 +31,7 @@ export async function drizzleSeed() {
 
     await seed(db, schema).refine((f) => ({
       locations: {
-        count: locationsCount,
+        count: counts.locations,
         columns: {
           name: f.city(),
           longitude: f.number({ minValue: -180, maxValue: 180 }),
@@ -37,18 +42,18 @@ export async function drizzleSeed() {
         },
       },
       users: {
-        count: usersCount,
+        count: counts.users,
         columns: { name: f.fullName() },
       },
       favorites: {
-        count: 5,
+        count: counts.favorites,
         columns: {
           label: f.valuesFromArray({ values: ["home", "office"] }),
         },
       },
 
       categories: {
-        count: 5,
+        count: counts.categories,
         columns: {
           name: f.valuesFromArray({
             values: [
@@ -63,12 +68,12 @@ export async function drizzleSeed() {
         },
       },
       locationsToCategories: {
-        count: 20,
+        count: counts.locationsToCategories,
       },
     }));
 
     console.info("Seeded");
-    console.table({ locations: locationsCount, users: usersCount });
+    console.table(counts);
   } catch (err) {
     console.log(err);
   } finally {

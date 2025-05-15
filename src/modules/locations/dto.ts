@@ -1,9 +1,18 @@
 import { z } from "zod";
 import { NumberStringSchema } from "../../helpers/validations";
-import { PaginationQuerySchema } from "../common/dto";
+import { IdSchema, PaginationQuerySchema } from "../common/dto";
 
 export const LongitudeSchema = z.number().min(-180).max(180);
 export const LatitudeSchema = z.number().min(-90).max(90);
+
+export const LocationSchema = z.object({
+  id: IdSchema,
+  longitude: z.string(),
+  latitude: z.string(),
+  name: z.string().nullable(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
 
 export const FindManyLocationsQuerySchema = z
   .object({
@@ -20,6 +29,7 @@ export const FindManyLocationsQuerySchema = z
         right: LongitudeSchema,
       })
       .optional(),
+    q: z.string().optional().describe("Search by location or category name."),
   })
   .merge(PaginationQuerySchema);
 

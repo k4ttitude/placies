@@ -7,10 +7,9 @@ import {
   UpdateLocationBodySchema,
 } from "./dto";
 import { route } from "../../helpers/route";
-import { z } from "zod";
-import { NumberStringSchema } from "../../helpers/validations";
 import { apikeyAuth } from "../auth/guard";
 import { openApiRegistry } from "../../openapi";
+import { IdParamsSchema } from "../common/dto";
 
 const locationsRouter = Router();
 
@@ -37,11 +36,12 @@ openApiRegistry.registerPath({
 locationsRouter.get(
   "/",
   route({ query: FindManyLocationsQuerySchema }, async (req, res) => {
-    const { lng, lat, distance, bound, limit, offset } = req.query;
+    const { lng, lat, distance, bound, q, limit, offset } = req.query;
     const results = await locationsServices.findLocations({
       point: { lng, lat },
       distanceInMeters: distance,
       bound,
+      q,
       limit,
       offset,
     });
@@ -68,7 +68,7 @@ locationsRouter.patch(
   "/:id",
   route(
     {
-      params: z.object({ id: NumberStringSchema }),
+      params: IdParamsSchema,
       body: UpdateLocationBodySchema,
     },
     async (req, res) => {
@@ -84,7 +84,7 @@ locationsRouter.patch(
 
 locationsRouter.delete(
   "/:id",
-  route({ params: z.object({ id: NumberStringSchema }) }, async (req, res) => {
+  route({ params: IdParamsSchema }, async (req, res) => {
     await locationsServices.deleteLocation(req.params.id);
 
     return res.status(200).end();

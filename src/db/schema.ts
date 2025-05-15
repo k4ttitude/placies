@@ -1,4 +1,4 @@
-import { SQL, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import {
   index,
   mysqlTable,
@@ -28,13 +28,17 @@ export const locations = mysqlTable(
     coordinates: point()
       .notNull()
       .generatedAlwaysAs(
-        (): SQL =>
+        () =>
           sql.raw(
             `ST_PointFromText(CONCAT('POINT(', latitude, ' ', longitude, ')'), ${GEOGRAPHY_SRID})`,
           ),
         { mode: "stored" },
       ),
     name: varchar("name", { length: 255 }),
+    nameLowerCase: varchar("name_lowercase", { length: 255 }).generatedAlwaysAs(
+      () => sql`LOWER(name)`,
+      { mode: "stored" },
+    ),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
   },
@@ -48,6 +52,10 @@ export const locations = mysqlTable(
 export const categories = mysqlTable("categories", {
   id: int().autoincrement().primaryKey(),
   name: varchar({ length: 255 }),
+  nameLowerCase: varchar("name_lowercase", { length: 255 }).generatedAlwaysAs(
+    () => sql`LOWER(name)`,
+    { mode: "stored" },
+  ),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
 });
