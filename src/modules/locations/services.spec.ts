@@ -35,24 +35,24 @@ describe("locations services", () => {
     const input = { longitude: "180", latitude: "0" };
     await db.insert(locations).values(input);
 
-    const results = await findLocations({
+    const result = await findLocations({
       point: { lng: -180, lat: 0 },
       distanceInMeters: 1_000,
     });
 
-    expect(results.length).toBeGreaterThanOrEqual(1);
+    expect(result.results.length).toBeGreaterThanOrEqual(1);
   });
 
   it("findLocations should work with bounding box near 180°E / -180°E", async () => {
     const input = { longitude: "180", latitude: "0" };
     await db.insert(locations).values(input);
 
-    const results = await findLocations({
+    const result = await findLocations({
       point: { lng: -180, lat: 0 },
       bound: { top: 1, bottom: -1, left: 178, right: -178 },
       distanceInMeters: 1_000,
     });
 
-    expect(results.length).toBeGreaterThanOrEqual(1);
+    expect(result.results.length).toBeGreaterThanOrEqual(1);
   });
 });

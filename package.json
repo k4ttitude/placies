@@ -7,9 +7,11 @@
   "scripts": {
     "dev": "tsx watch src/app.ts",
     "debug": "tsx watch --inspect=9229 src/app.ts",
-    "start": "NODE_ENV=production tsx src/app.ts",
+    "start": "NODE_ENV=production node dist/app.cjs",
     "test": "jest",
-    "seed": "tsx src/db/seed.ts"
+    "migrate": "drizzle-kit migrate",
+    "seed": "tsx src/db/seed.ts",
+    "build": "tsup"
   },
   "keywords": [],
   "author": "",
@@ -28,6 +30,7 @@
     "passport": "^0.7.0",
     "passport-http-header-strategy": "^1.1.0",
     "swagger-ui-express": "^5.0.1",
+    "tsx": "^4.19.4",
     "typescript": "^5.8.3",
     "zod": "^3.24.4"
   },
@@ -47,7 +50,7 @@
     "globals": "^16.1.0",
     "prettier": "3.5.3",
     "ts-jest": "^29.3.3",
-    "tsx": "^4.19.4",
+    "tsup": "^8.4.0",
     "typescript-eslint": "^8.32.0"
   }
 }
