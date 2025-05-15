@@ -18,11 +18,13 @@ const locationsRouter: Router = Router();
 locationsRouter.get(
   "/",
   route({ query: FindManyLocationsQuerySchema }, async (req, res) => {
-    const { lng: lng, lat, distance, bound } = req.query;
+    const { lng, lat, distance, bound, limit, offset } = req.query;
     const results = await locationsServices.findLocations({
       point: { lng, lat },
       distanceInMeters: distance,
       bound,
+      limit,
+      offset,
     });
 
     return res.status(200).send(results);

@@ -4,6 +4,7 @@ import { locations } from "../../db/schema";
 import { sqlGeographicPoint } from "../../db/column";
 import { PlaciesError } from "../../error";
 import { CreateLocationBody, UpdateLocationBody } from "./dto";
+import { DEFAULT_PAGINATION, PaginationQuery } from "../common/dto";
 
 const KM_PER_LAT = 111.32;
 
@@ -11,10 +12,10 @@ function degreesToRadians(degrees: number) {
   return degrees * (Math.PI / 180);
 }
 
-type FindLocationsQuery = {
+type FindLocationsQuery = Partial<PaginationQuery> & {
   point: { lat: number; lng: number };
   bound?: { top: number; bottom: number; left: number; right: number };
-  distanceInMeters: number; // distance in meters
+  distanceInMeters: number;
 };
 
 /**
@@ -29,6 +30,8 @@ export async function findLocations({
   point,
   bound,
   distanceInMeters,
+  limit = DEFAULT_PAGINATION.limit,
+  offset = DEFAULT_PAGINATION.offset,
 }: FindLocationsQuery) {
   const now = new Date().toISOString();
   const key = `${now} Find locations:`;
@@ -71,7 +74,8 @@ export async function findLocations({
     .having(({ distance: calculatedDistance }) =>
       lte(calculatedDistance, distanceInMeters),
     )
-    .limit(10);
+    .limit(limit)
+    .offset(offset);
 
   console.timeEnd(key);
 

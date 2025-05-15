@@ -10,3 +10,5 @@ export const PaginationQuerySchema = z.object({
   limit: NumberStringSchema.pipe(z.number().nonnegative()).default("10"),
   offset: NumberStringSchema.pipe(z.number().nonnegative()).default("0"),
 });
+export type PaginationQuery = z.infer<typeof PaginationQuerySchema>;
+export const DEFAULT_PAGINATION = { limit: 10, offset: 0 };
