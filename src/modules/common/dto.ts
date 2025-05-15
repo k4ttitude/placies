@@ -1,10 +1,15 @@
 import { z } from "zod";
 import { NumberStringSchema } from "../../helpers/validations";
+import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
 
-export const IdSchema = NumberStringSchema.transform(Number).pipe(z.number());
+extendZodWithOpenApi(z);
+
+export const IdSchema = NumberStringSchema.pipe(z.number());
 export type Id = z.infer<typeof IdSchema>;
 
-export const IdParamsSchema = z.object({ id: IdSchema });
+export const IdParamsSchema = z.object({
+  id: IdSchema.openapi({ param: { name: "id", in: "path" } }),
+});
 
 export const PaginationQuerySchema = z.object({
   limit: NumberStringSchema.pipe(z.number().nonnegative()).default("10"),

@@ -3,18 +3,37 @@ import * as locationsServices from "./services";
 import {
   CreateLocationBodySchema,
   FindManyLocationsQuerySchema,
+  FindManyLocationsResponseSchema,
   UpdateLocationBodySchema,
 } from "./dto";
 import { route } from "../../helpers/route";
 import { z } from "zod";
 import { NumberStringSchema } from "../../helpers/validations";
 import { apikeyAuth } from "../auth/guard";
+import { openApiRegistry } from "../../openapi";
 
-const locationsRouter: Router = Router();
+const locationsRouter = Router();
 
 /**
  * Public route
  */
+openApiRegistry.registerPath({
+  path: "/locations",
+  method: "get",
+  summary: "Find locations",
+  description:
+    "Find locations near specified center point and distance. Bounding box is also supported.",
+  tags: ["locations"],
+  request: { query: FindManyLocationsQuerySchema },
+  responses: {
+    200: {
+      description: "Results",
+      content: {
+        "application/json": { schema: FindManyLocationsResponseSchema },
+      },
+    },
+  },
+});
 locationsRouter.get(
   "/",
   route({ query: FindManyLocationsQuerySchema }, async (req, res) => {

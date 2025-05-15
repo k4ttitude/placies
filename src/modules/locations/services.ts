@@ -3,7 +3,11 @@ import { db } from "../../db";
 import { locations } from "../../db/schema";
 import { sqlGeographicPoint } from "../../db/column";
 import { PlaciesError } from "../../error";
-import { CreateLocationBody, UpdateLocationBody } from "./dto";
+import {
+  CreateLocationBody,
+  FindManyLocationsResponse,
+  UpdateLocationBody,
+} from "./dto";
 import { DEFAULT_PAGINATION, PaginationQuery } from "../common/dto";
 
 const KM_PER_LAT = 111.32;
@@ -32,7 +36,7 @@ export async function findLocations({
   distanceInMeters,
   limit = DEFAULT_PAGINATION.limit,
   offset = DEFAULT_PAGINATION.offset,
-}: FindLocationsQuery) {
+}: FindLocationsQuery): Promise<FindManyLocationsResponse> {
   const now = new Date().toISOString();
   const key = `${now} Find locations:`;
   console.time(key);
@@ -67,7 +71,7 @@ export async function findLocations({
   const locationRecords = await db
     .select({
       ...getTableColumns(locations),
-      distance: sql`ST_Distance_Sphere(${locations.coordinates}, ${centrePoint})`,
+      distance: sql<number>`ST_Distance_Sphere(${locations.coordinates}, ${centrePoint})`,
     })
     .from(locations)
     .where(and(...boundingBoxConditions))
@@ -79,7 +83,7 @@ export async function findLocations({
 
   console.timeEnd(key);
 
-  return locationRecords;
+  return { results: locationRecords, pagination: { limit, offset } };
 }
 
 export async function findLocation(id: number) {

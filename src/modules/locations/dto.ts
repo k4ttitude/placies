@@ -23,6 +23,28 @@ export const FindManyLocationsQuerySchema = z
   })
   .merge(PaginationQuerySchema);
 
+export const FindManyLocationsResponseSchema = z.object({
+  results: z
+    .object({
+      id: z.number().int(),
+      longitude: z.string(),
+      latitude: z.string(),
+      // coordinates: z.object({
+      //   x: z.number(),
+      //   y: z.number(),
+      // }),
+      name: z.string().nullable(),
+      createdAt: z.date(),
+      updatedAt: z.date(),
+      distance: z.number(),
+    })
+    .array(),
+  pagination: PaginationQuerySchema,
+});
+export type FindManyLocationsResponse = z.infer<
+  typeof FindManyLocationsResponseSchema
+>;
+
 export const CreateLocationBodySchema = z.object({
   lng: LongitudeSchema,
   lat: LongitudeSchema,

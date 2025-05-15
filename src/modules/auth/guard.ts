@@ -7,11 +7,11 @@ import { users } from "../../db/schema";
 import { PlaciesError } from "../../error";
 import { tryCatch } from "../../helpers/try-catch";
 
-export const API_HEADER = "X-PLACIES-TOKEN";
+export const APIKEY_HEADER = "X-PLACIES-TOKEN";
 
 passport.use(
   new HeaderStrategy(
-    { header: API_HEADER, passReqToCallback: true },
+    { header: APIKEY_HEADER, passReqToCallback: true },
     async function (_req: Request, token: string, done: DoneCallback) {
       const [user, error] = await tryCatch(
         db.query.users.findFirst({

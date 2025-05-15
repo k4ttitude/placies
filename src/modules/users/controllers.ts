@@ -1,9 +1,22 @@
 import { Router } from "express";
 import { route } from "../../helpers/route";
 import { getUsers } from "./services";
+import { openApiRegistry } from "../../openapi";
 
-const usersRouter: Router = Router();
+const usersRouter = Router();
 
+openApiRegistry.registerPath({
+  path: "/users",
+  method: "get",
+  summary: "Get all users",
+  tags: ["users"],
+  responses: {
+    200: {
+      description: "Users list",
+      content: { "application/json": { schema: {} } },
+    },
+  },
+});
 usersRouter.get(
   "/",
   route({}, async (_req, res) => {
