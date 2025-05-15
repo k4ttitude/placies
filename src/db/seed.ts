@@ -1,4 +1,10 @@
-import { favorites, locations, users } from "./schema";
+import {
+  categories,
+  favorites,
+  locations,
+  locationsToCategories,
+  users,
+} from "./schema";
 import { db } from "./index";
 import { reset, seed } from "drizzle-seed";
 import { GEOGRAPHY_SRID } from "./column";
@@ -9,7 +15,13 @@ const usersCount = parseInt(process.env.USERS || "5");
 
 export async function drizzleSeed() {
   try {
-    const schema = { locations, users, favorites };
+    const schema = {
+      locations,
+      users,
+      favorites,
+      categories,
+      locationsToCategories,
+    };
     await reset(db, schema);
 
     await seed(db, schema).refine((f) => ({
@@ -30,7 +42,28 @@ export async function drizzleSeed() {
       },
       favorites: {
         count: 5,
-        columns: { label: f.valuesFromArray({ values: ["home", "office"] }) },
+        columns: {
+          label: f.valuesFromArray({ values: ["home", "office"] }),
+        },
+      },
+
+      categories: {
+        count: 5,
+        columns: {
+          name: f.valuesFromArray({
+            values: [
+              "Supermarket",
+              "School",
+              "Gas station",
+              "Office building",
+              "Metro",
+            ],
+            isUnique: true,
+          }),
+        },
+      },
+      locationsToCategories: {
+        count: 20,
       },
     }));
 

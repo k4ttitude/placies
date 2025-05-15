@@ -15,6 +15,13 @@
       "when": 1747238653863,
       "tag": "0001_favorites_id",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1747298856922,
+      "tag": "0002_categories",
+      "breakpoints": true
     }
   ]
 }

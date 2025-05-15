@@ -45,6 +45,29 @@ export const locations = mysqlTable(
   ],
 );
 
+export const categories = mysqlTable("categories", {
+  id: int().autoincrement().primaryKey(),
+  name: varchar({ length: 255 }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+});
+
+export const locationsToCategories = mysqlTable(
+  "location_to_categories",
+  {
+    id: int().autoincrement().primaryKey(),
+    locationId: int("location_id")
+      .references(() => locations.id)
+      .notNull(),
+    categoryId: int("category_id")
+      .references(() => categories.id)
+      .notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+  },
+  (t) => [unique().on(t.locationId, t.categoryId)],
+);
+
 export const favorites = mysqlTable(
   "favorites",
   {
