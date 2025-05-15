@@ -1,4 +1,4 @@
-import { and, eq, getTableColumns, lte, sql } from "drizzle-orm";
+import { and, eq, getTableColumns, lte, or, sql } from "drizzle-orm";
 import { db } from "../../db";
 import { locations } from "../../db/schema";
 import { sqlGeographicPoint } from "../../db/column";
@@ -39,7 +39,11 @@ export async function findLocations({
 
   const boundingBoxConditions = [
     sql`ABS(${locations.latitude} - ${point.lat}) * ${KM_PER_LAT}  <= ${distanceInKm}`,
-    sql`ABS(${locations.longitude} - ${point.lng}) * ${kmPerDeltaLng} <= ${distanceInKm}`,
+    or(
+      sql`ABS(${locations.longitude} - ${point.lng}) * ${kmPerDeltaLng} <= ${distanceInKm}`,
+      sql`ABS(${locations.longitude} - ${point.lng} + 360) * ${kmPerDeltaLng} <= ${distanceInKm}`,
+      sql`ABS(${locations.longitude} - ${point.lng} - 360) * ${kmPerDeltaLng} <= ${distanceInKm}`,
+    ),
   ];
 
   if (bound) {
@@ -47,8 +51,11 @@ export async function findLocations({
     boundingBoxConditions.unshift(
       sql`${locations.latitude} <= ${bound.top}`,
       sql`${locations.latitude} >= ${bound.bottom}`,
-      sql`${locations.longitude} >= ${bound.left}`,
-      sql`${locations.longitude} <= ${bound.right}`,
+      or(
+        sql`${locations.longitude} BETWEEN ${bound.left} AND ${bound.right}`,
+        sql`${locations.longitude} BETWEEN ${bound.left - 360} AND ${bound.right}`,
+        sql`${locations.longitude} BETWEEN ${bound.left} AND ${bound.right + 360}`,
+      ),
     );
   }
 
